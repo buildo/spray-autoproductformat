@@ -25,8 +25,8 @@ object AutoProductFormatMacro {
     val args = tt.tpe.decls
       .collect { case m: MethodSymbol if m.isCaseAccessor => m.name -> m.returnType }
       .toList
-    val argNames = args.map { case (n, _) => Literal(Constant(n.toString)) }
-    val argTypes = args.map { case (_, t) => parseType(c)(t.toString).head }
+    val argNames = args.map { case (n, _) => q"${n.toString}" }
+    val argTypes = args.map { case (_, t) => tq"$t" }
 
     q"_root_.spray.json.DefaultJsonProtocol.jsonFormat[..$argTypes, $ts]($tc.apply, ..$argNames)"
   }
@@ -36,11 +36,8 @@ object AutoProductFormatMacro {
 
     def resolveType(qualifiedName: String): Tree =
       qualifiedName.trim().split('.').toList match {
-        case x :: Nil => Ident(TypeName(x))
-        case xs :+ x =>
-          val parts = xs.map(TermName(_))
-          val pkg: Tree = parts.tail.foldLeft[Tree] (Ident(parts.head)) { (tree, part) => Select(tree, part) }
-          Select(pkg, TypeName(x))
+        case x :: Nil => q"$x"
+        case xs => tq"""${xs.mkString(".")}"""
       }
 
     val x = tpe.indexOf("[")
