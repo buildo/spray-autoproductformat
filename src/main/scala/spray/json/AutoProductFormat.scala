@@ -13,13 +13,14 @@ object AutoProductFormat extends AutoProductFormat
 
 
 object AutoProductFormatMacro {
-  import scala.reflect.macros.Context
+  import scala.reflect.macros.blackbox.Context
 
-  def autoProductFormatMacro[T <: Product : c.WeakTypeTag](c: Context)(apf: c.Expr[AutoProductFormattable[T]]): c.Expr[RootJsonFormat[T]] = {
+  def autoProductFormatMacro[T <: Product : c.WeakTypeTag](c: Context)(apf: c.Expr[AutoProductFormattable[T]]): c.Tree = {
     import c.universe._
 
     val tt = weakTypeTag[T]
     val ts = tt.tpe.typeSymbol.asClass
+    val tc = ts.companion
 
     val args = tt.tpe.declarations
       .collect { case m: MethodSymbol if m.isCaseAccessor => m.name -> m.returnType }
@@ -27,15 +28,7 @@ object AutoProductFormatMacro {
     val argNames = args.map { case (n, _) => Literal(Constant(n.toString)) }
     val argTypes = args.map { case (_, t) => parseType(c)(t.toString).head }
 
-    c.Expr[RootJsonFormat[T]](
-      Apply(
-        TypeApply(
-          Select(reify(spray.json.DefaultJsonProtocol).tree, newTermName("jsonFormat")),
-          argTypes :+ Ident(ts)
-        ),
-        Select(Ident(ts.companionSymbol), newTermName("apply")) :: argNames
-      )
-    )
+    q"_root_.spray.json.DefaultJsonProtocol.jsonFormat[..$argTypes, $ts]($tc.apply, ..$argNames)"
   }
 
   protected def parseType(c: Context)(tpe: String): List[c.Tree] = {
@@ -54,12 +47,9 @@ object AutoProductFormatMacro {
     if (x > 0) {
       val root = tpe.substring(0, x)
       val parameters = tpe.substring(x + 1, tpe.lastIndexOf("]"))
-      List(
-        AppliedTypeTree(
-          resolveType(root),
-          parseType(c)(parameters)
-        )
-      )
+      val rt = resolveType(root)
+      val pts = parseType(c)(parameters)
+      List(tq"$rt[..$pts]")
     } else {
       tpe.split(',').toList.map(resolveType(_))
     }
