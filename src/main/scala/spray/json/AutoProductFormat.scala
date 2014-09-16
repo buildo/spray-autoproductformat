@@ -22,7 +22,7 @@ object AutoProductFormatMacro {
     val ts = tt.tpe.typeSymbol.asClass
     val tc = ts.companion
 
-    val args = tt.tpe.declarations
+    val args = tt.tpe.decls
       .collect { case m: MethodSymbol if m.isCaseAccessor => m.name -> m.returnType }
       .toList
     val argNames = args.map { case (n, _) => Literal(Constant(n.toString)) }
@@ -36,11 +36,11 @@ object AutoProductFormatMacro {
 
     def resolveType(qualifiedName: String): Tree =
       qualifiedName.trim().split('.').toList match {
-        case x :: Nil => Ident(newTypeName(x))
+        case x :: Nil => Ident(TypeName(x))
         case xs :+ x =>
-          val parts = xs.map(newTermName(_))
+          val parts = xs.map(TermName(_))
           val pkg: Tree = parts.tail.foldLeft[Tree] (Ident(parts.head)) { (tree, part) => Select(tree, part) }
-          Select(pkg, newTypeName(x))
+          Select(pkg, TypeName(x))
       }
 
     val x = tpe.indexOf("[")
