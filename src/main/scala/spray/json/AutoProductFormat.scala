@@ -26,7 +26,6 @@ object AutoProductFormatMacro {
       .toList
     val argNames = args.map { case (n, _) => Literal(Constant(n.toString)) }
     val argTypes = args.map { case (_, t) => parseType(c)(t.toString).head }
-    println(argTypes)
 
     c.Expr[RootJsonFormat[T]](
       Apply(
@@ -57,7 +56,7 @@ object AutoProductFormatMacro {
       val parameters = tpe.substring(x + 1, tpe.lastIndexOf("]"))
       List(
         AppliedTypeTree(
-          Ident(newTypeName(root)),
+          resolveType(root),
           parseType(c)(parameters)
         )
       )
