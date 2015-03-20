@@ -2,9 +2,9 @@ organization  := "io.buildo"
 
 name := "spray-autoproductformat"
 
-version       := "0.1-SNAPSHOT"
+version       := "0.2"
 
-scalaVersion  := "2.11.0"
+scalaVersion  := "2.11.6"
 
 scalacOptions := Seq("-unchecked",
                      "-deprecation",
@@ -19,3 +19,5 @@ libraryDependencies ++= Seq(
 )
 
 publishTo := Some(Resolver.file("file", new File("releases")))
+
+
