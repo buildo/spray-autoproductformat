@@ -4,13 +4,12 @@ import scala.language.experimental.macros
 
 trait AutoProductFormattable[T <: Product]
 
-trait AutoProductFormat extends DefaultJsonProtocol {
+trait AutoProductFormat {
   implicit def jsonFormat[T <: Product](implicit apf: AutoProductFormattable[T]): RootJsonFormat[T] =
       macro AutoProductFormatMacro.autoProductFormatMacro[T]
 }
 
 object AutoProductFormat extends AutoProductFormat
-
 
 object AutoProductFormatMacro {
   import scala.reflect.macros.blackbox.Context
