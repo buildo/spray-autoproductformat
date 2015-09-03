@@ -30,25 +30,4 @@ object AutoProductFormatMacro {
     q"_root_.spray.json.DefaultJsonProtocol.jsonFormat[..$argTypes, $ts]($tc.apply, ..$argNames)"
   }
 
-  protected def parseType(c: Context)(tpe: String): List[c.Tree] = {
-    import c.universe._
-
-    def resolveType(qualifiedName: String): Tree =
-      qualifiedName.trim().split('.').toList match {
-        case x :: Nil => q"$x"
-        case xs => tq"""${xs.mkString(".")}"""
-      }
-
-    val x = tpe.indexOf("[")
-    if (x > 0) {
-      val root = tpe.substring(0, x)
-      val parameters = tpe.substring(x + 1, tpe.lastIndexOf("]"))
-      val rt = resolveType(root)
-      val pts = parseType(c)(parameters)
-      List(tq"$rt[..$pts]")
-    } else {
-      tpe.split(',').toList.map(resolveType(_))
-    }
-  }
-
 }
