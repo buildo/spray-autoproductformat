@@ -9,6 +9,10 @@ trait AutoProductFormat {
       macro AutoProductFormatMacro.autoProductFormatMacro[T]
 }
 
+trait LargeProductFormat[A <: Product] {
+  def getJsonFormat: RootJsonFormat[A]
+}
+
 object AutoProductFormat extends AutoProductFormat
 
 object AutoProductFormatMacro {
@@ -27,7 +31,11 @@ object AutoProductFormatMacro {
     val argNames = args.map { case (n, _) => q"${n.toString}" }
     val argTypes = args.map { case (_, t) => tq"$t" }
 
-    q"_root_.spray.json.DefaultJsonProtocol.jsonFormat[..$argTypes, $ts]($tc.apply, ..$argNames)"
+    if (args.length <= 22) {
+      q"_root_.spray.json.DefaultJsonProtocol.jsonFormat[..$argTypes, $ts]($tc.apply, ..$argNames)"
+    } else {
+      q"implicitly[_root_.spray.json.LargeProductFormat[${tt.tpe}]].getJsonFormat"
+    }
   }
 
 }
