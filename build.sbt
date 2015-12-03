@@ -4,7 +4,7 @@ name          := "spray-autoproductformat"
 
 version       := "0.3.0"
 
-scalaVersion  := "2.11.6"
+scalaVersion  := "2.11.7"
 
 scalacOptions := Seq("-unchecked",
                      "-deprecation",
