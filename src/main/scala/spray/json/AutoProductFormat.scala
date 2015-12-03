@@ -4,7 +4,7 @@ import scala.language.experimental.macros
 
 trait AutoProductFormat {
   def autoProductSerialize[T <: Product]: RootJsonFormat[T] =
-      macro AutoProductFormatMacro.autoProductFormatMacro[T]
+    macro AutoProductFormatMacro.autoProductFormatMacro[T]
 }
 
 trait LargeProductFormat[A <: Product] {
