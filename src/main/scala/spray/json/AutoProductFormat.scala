@@ -2,10 +2,8 @@ package spray.json
 
 import scala.language.experimental.macros
 
-trait AutoProductFormattable[T <: Product]
-
 trait AutoProductFormat {
-  implicit def jsonFormat[T <: Product](implicit apf: AutoProductFormattable[T]): RootJsonFormat[T] =
+  def autoProductSerialize[T <: Product]: RootJsonFormat[T] =
       macro AutoProductFormatMacro.autoProductFormatMacro[T]
 }
 
@@ -18,7 +16,7 @@ object AutoProductFormat extends AutoProductFormat
 object AutoProductFormatMacro {
   import scala.reflect.macros.blackbox.Context
 
-  def autoProductFormatMacro[T <: Product : c.WeakTypeTag](c: Context)(apf: c.Expr[AutoProductFormattable[T]]): c.Tree = {
+  def autoProductFormatMacro[T <: Product : c.WeakTypeTag](c: Context): c.Tree = {
     import c.universe._
 
     val tt = weakTypeTag[T]
